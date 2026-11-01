@@ -1,0 +1,24 @@
+import test from'node:test';import assert from'node:assert/strict';import{zero,amount,replay,saveEntry,entries,limits,quantity,emptyState,mergeBackup,baseMatches,mergeWebData,uuid}from'./core.mjs';
+const entry=(id,type,n=0,from=1,to=0,timestamp=1)=>({id,type,from,to,counts:zero().map((_,i)=>i===2?n:0),timestamp,voided:false});const opening=()=>[entry('a','OPENING',0,0,0),entry('b','OPENING',0,1,1)];
+function rows(){let r=[];for(const e of opening())r=saveEntry(r,e);return r;}
+test('收款、支出、轉移、盤點依歷史計算',()=>{const es=[...opening(),entry('in','DEPOSIT',10),entry('out','WITHDRAW',2),entry('move','TRANSFER',3),entry('count','AUDIT',4)];const s=replay(es);assert.equal(s.q[0][2],3);assert.equal(s.q[1][2],4);assert.equal(s.total,70000);});
+test('兩款十元面額分開及精確港仙',()=>{const q=zero();q[5]=1;q[6]=2;q[12]=3;assert.equal(amount(q),3030);});
+test('超額、負數、小數、科學記數、貼上空白拒絕而不截短',()=>{for(const x of ['11','-1','1.5','1e2',' 1','999999999999999999999'])assert.throws(()=>quantity(x,10));assert.equal(quantity('10',10),10);assert.equal(quantity('0',0),0);});
+test('零庫存提取失敗',()=>assert.throws(()=>replay([...opening(),entry('out','WITHDRAW',1)])));
+test('轉移不增加總額',()=>{const es=[...opening(),entry('in','DEPOSIT',10),entry('move','TRANSFER',7)];assert.equal(replay(es).total,100000);assert.equal(replay(es).q[0][2],7);});
+test('同來源目的地轉移拒絕',()=>assert.throws(()=>replay([...opening(),entry('move','TRANSFER',0,1,1)])));
+test('交易 ID 重複拒絕',()=>assert.throws(()=>replay([...opening(),entry('x','DEPOSIT',1),entry('x','DEPOSIT',2)])));
+test('修訂需保護後續支出',()=>{let r=rows();r=saveEntry(r,entry('in','DEPOSIT',10));r=saveEntry(r,entry('out','WITHDRAW',8));assert.throws(()=>saveEntry(r,entry('in','DEPOSIT',7)));assert.equal(entries(r)[2].counts[2],10);});
+test('歷史修訂上限不只看目前餘額',()=>{let r=rows();r=saveEntry(r,entry('in','DEPOSIT',10));r=saveEntry(r,entry('out','WITHDRAW',3));r=saveEntry(r,entry('later','WITHDRAW',4));assert.equal(limits(r,entry('out','WITHDRAW',3))[2],6);});
+test('重試相同操作不重複增加修訂',()=>{const e=entry('in','DEPOSIT',10);let r=saveEntry(rows(),e);const n=r.length;r=saveEntry(r,e);assert.equal(r.length,n);});
+test('作廢、恢復保留所有原修訂',()=>{let r=saveEntry(rows(),entry('in','DEPOSIT',10));const original=JSON.stringify(r);r=saveEntry(r,{...entry('in','DEPOSIT',10),voided:true});assert.equal(replay(entries(r)).total,0);r=saveEntry(r,entry('in','DEPOSIT',10));assert.equal(replay(entries(r)).total,100000);assert.equal(JSON.stringify(r.slice(0,3)),original);});
+test('有後續提款不允許作廢收入',()=>{let r=saveEntry(rows(),entry('in','DEPOSIT',10));r=saveEntry(r,entry('out','WITHDRAW',1));assert.throws(()=>saveEntry(r,{...entry('in','DEPOSIT',10),voided:true}));});
+test('備份重複匯入不重複交易',()=>{const s=emptyState();s.revisions=saveEntry(rows(),entry('in','DEPOSIT',10));const a=mergeBackup(emptyState(),s),b=mergeBackup(a,s);assert.equal(b.revisions.length,s.revisions.length);});
+test('備份衝突停止，原本狀態不變',()=>{const a=emptyState();a.revisions=saveEntry(rows(),entry('in','DEPOSIT',10));const b=structuredClone(a);b.revisions[2].payload=JSON.stringify(entry('in','DEPOSIT',11));const before=JSON.stringify(a);assert.throws(()=>mergeBackup(a,b));assert.equal(JSON.stringify(a),before);});
+test('雲端同一操作可辨認已完成',()=>assert.equal(baseMatches({op:'same'},{operation:'same'}),'done'));
+test('雲端舊版本不覆寫新版本',()=>assert.equal(baseMatches({op:'new',base:1,seconds:1,nanos:0},{version:2,updatedAt:{seconds:1,nanoseconds:0}}),'conflict'));
+test('雲端舊時間不覆寫同版本不同內容',()=>assert.equal(baseMatches({op:'new',base:1,seconds:1,nanos:0},{version:1,updatedAt:{seconds:2,nanoseconds:0}}),'conflict'));
+test('刪除新紀錄不會被離線新建覆蓋',()=>assert.equal(baseMatches({op:'new',fresh:true},{deleted:true,version:2}),'conflict'));
+test('共用現金相同修訂不同內容會衝突',()=>{const a={revisions:saveEntry(rows(),entry('in','DEPOSIT',10)),cards:[]};const b=structuredClone(a);b.revisions[2].payload=JSON.stringify(entry('in','DEPOSIT',11));assert.throws(()=>mergeWebData(a,b));});
+test('共用 SD 卡不同內容保留衝突',()=>assert.throws(()=>mergeWebData({revisions:[],cards:[{id:'c',name:'local'}]},{revisions:[],cards:[{id:'c',name:'remote'}]})));
+test('操作識別為 UUID 並不重複',()=>{const a=new Set(Array.from({length:1000},uuid));assert.equal(a.size,1000);assert.match([...a][0],/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);});

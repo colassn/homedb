@@ -1,0 +1,1 @@
+{"firestore":{"rules":"firestore.rules"},"functions":[{"source":"firebase-runtime","codebase":"personalos-web"}],"emulators":{"firestore":{"port":8085},"ui":{"enabled":false}}}

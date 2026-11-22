@@ -273,4 +273,3 @@ button[data-act=weather][data-pending] svg{animation:weather-refresh .8s linear 
 
 @media(max-width:700px){.ambient-home .ambient-header:has(.ambient-cash){flex-basis:38px}}
 
-.projector-hosted-link{display:inline-flex;align-items:center;min-height:44px;margin-top:10px;text-decoration:none}

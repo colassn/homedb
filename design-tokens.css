@@ -184,3 +184,93 @@ loan-app .page-title{padding:8px 4px 20px}loan-app .page-title h1{margin:4px 0}l
 .loan-directory .loan-detail{margin:0;padding:20px;border:0;border-top:3px solid #7f9dbb;border-radius:0;background:#edf3fa}.loan-directory .loan-detail>header small{color:#446888;font-weight:700;letter-spacing:1px}.loan-directory .loan-detail h2{color:#284864}.loan-directory .loan-entry{background:white;padding:16px;border:1px solid #ccd9e6;border-radius:12px;margin:10px 0}.loan-directory .loan-history-heading{padding-top:20px;border-top:1px solid #bdccdc;color:#284864}.loan-directory .loan-history{background:#fff;padding:14px 16px;border:1px solid #d2dde8;border-left:4px solid #6d8daa;border-radius:10px;margin:10px 0}.loan-directory .history-repay{border-left-color:#448563;background:#f0faf4}.loan-directory .history-lend{border-left-color:#bc7656;background:#fff6ef}.loan-directory .history-void{border-left-color:#8c8790;background:#f1eff3}.loan-directory .loan-empty{background:white;border-radius:14px;border:1px dashed #b9c9c0;margin:0;grid-column:1/-1}
 @media(max-width:700px){.loan-overview,.loan-directory{padding:16px 12px;border-radius:20px}.loan-section-heading{gap:10px}.loan-section-heading h2{font-size:18px}.loan-section-heading p{font-size:11px}.loan-overview .loan-stats{grid-template-columns:1fr 1fr}.loan-overview .loan-stats article:first-child{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}.loan-overview .loan-stats article:first-child strong{font-size:29px;margin:0}.loan-overview .loan-stats article{padding:13px}.loan-overview .loan-sync{gap:8px;align-items:center}.loan-directory .loan-toolbar{padding:12px}.loan-directory .loan-detail{padding:16px}.loan-directory .borrower-balance strong{font-size:30px}.loan-directory .loan-people{gap:20px}.loan-directory .loan-section-heading>b{font-size:11px}}
 .loan-directory .loan-detail>header .primary{background:#31674e;border-color:#31674e;color:white}
+/* 1.8.2: a bounded, single-screen display; sections fit their available space. */
+body[data-page=display]{height:var(--display-height,100dvh);overflow:hidden}body[data-page=display] #app{height:100%;overflow:hidden}
+.ambient-home.has-notes{box-sizing:border-box;height:var(--display-height,100dvh);min-height:0;max-height:var(--display-height,100dvh);padding:12px 16px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.ambient-home .ambient-header{flex:0 0 38px;min-height:0}.ambient-home .ambient-header strong{font-size:20px}.ambient-home .ambient-header small{font-size:10px}.ambient-home .ambient-enter{padding:8px 14px;min-height:34px}.ambient-home .ambient-footer{display:none}
+.ambient-home.has-notes .ambient-grid{flex:1;min-height:0;height:0;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);grid-template-rows:minmax(0,.9fr) minmax(0,1.1fr);grid-template-areas:'clock weather' 'notes notes';gap:10px}
+.ambient-home.has-notes .ambient-clock{min-height:0;padding:14px;gap:8px;border-radius:20px}.ambient-home .ambient-digits{font-size:clamp(34px,6.7vw,92px)}.ambient-home .ambient-label{font-size:15px;letter-spacing:1px}.ambient-home .ambient-date{font-size:10px;gap:8px}.ambient-home .clock-extra{padding-top:10px;margin-top:2px;gap:20px}.ambient-home .clock-extra b{font-size:13px}.ambient-home .clock-extra span{font-size:9px}
+.ambient-home.has-notes .ambient-weather{min-height:0;overflow:hidden;border-radius:20px}.ambient-home .ambient-weather .weather-panel{height:auto;min-height:0;box-sizing:border-box;padding:12px 16px;border-radius:20px}.ambient-home .weather-head{font-size:12px}.ambient-home .weather-main{min-height:0;margin:2px 0;display:flex}.ambient-home .temperature{font-size:42px}.ambient-home .weather-orb,.ambient-home .hko-weather-icon{height:45px;width:45px;flex-basis:45px}.ambient-home .weather-condition{font-size:12px}.ambient-home .weather-metrics{grid-template-columns:repeat(4,minmax(0,1fr));margin:7px 0;gap:6px}.ambient-home .weather-metrics>div{padding:6px 8px}.ambient-home .weather-metrics strong{font-size:17px}.ambient-home .weather-metrics small{font-size:9px}.ambient-home .weather-wind{margin:4px 0;font-size:10px}.ambient-home .weather-bottom{min-height:0;margin:4px 0;padding:4px 0;font-size:9px}.ambient-home .forecast{margin-top:5px;padding-top:5px;gap:4px}.ambient-home .forecast>div{gap:2px;font-size:9px}.ambient-home .forecast strong{font-size:12px}.ambient-home .forecast svg,.ambient-home .forecast img{width:22px;height:22px}.ambient-home .weather-outlook{margin-top:4px;padding-top:4px;font-size:10px}.ambient-home .weather-outlook summary{min-height:18px}.ambient-home .weather-warnings{margin-top:4px;gap:4px}.ambient-home .weather-warning{padding:4px 6px;font-size:10px}
+.ambient-home.has-notes .ambient-notes{min-height:0;height:100%;box-sizing:border-box;padding:12px 16px;border-radius:20px;display:flex;flex-direction:column;overflow:hidden}.ambient-home .ambient-notes>.section-head{flex:none;margin:0 0 8px;padding-bottom:6px;min-height:0}.ambient-home .ambient-notes>.section-head h2{font-size:16px;margin:0}.ambient-home .display-records-grid{flex:none;min-height:0;gap:18px;grid-template-columns:minmax(0,.65fr) minmax(0,1.35fr);overflow:visible;transform-origin:top left}.ambient-home .display-records-grid h3{margin:0 0 6px;font-size:12px}.ambient-home .display-lending{padding-left:18px;border-left:1px solid #e6ddce;border-top:0}.ambient-home .display-loan-head{font-size:11px}.ambient-home .display-loan-head>span{font-size:17px}.ambient-home .display-loan-list{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;max-height:none;overflow:visible;gap:6px;margin-top:6px}.ambient-home .display-loan-row{display:block;min-height:0;padding:9px;height:auto}.ambient-home .display-loan-row strong{font-size:13px}.ambient-home .display-loan-row small{font-size:10px}.ambient-home .display-loan-amounts{margin-top:5px;text-align:left}.ambient-home .display-loan-amounts b{font-size:16px;margin-top:3px}.ambient-home .ambient-notes .memo-feed{flex:none;max-height:none!important;min-height:0;overflow:visible}.ambient-home .ambient-notes .ambient-note:nth-child(n){min-height:0;padding:7px 0;display:flex}.ambient-home .ambient-note-content strong{font-size:14px;white-space:normal}.ambient-home .ambient-note-content p{display:block;overflow:visible;-webkit-line-clamp:unset;font-size:11px}.ambient-home .display-note-controls{padding:0 0 6px;gap:4px}.ambient-home .display-note-controls>small{display:none}.ambient-home .display-note-controls button{min-height:28px;padding:3px 6px;font-size:10px}.ambient-home .display-notes-empty,.ambient-home .display-loan-empty{padding:16px 8px!important;font-size:11px!important}
+@media(max-width:700px){.ambient-home.has-notes{padding:8px;gap:6px}.ambient-home.has-notes .ambient-grid{grid-template-columns:1fr;grid-template-rows:minmax(0,.45fr) minmax(0,1fr) minmax(0,1.2fr);grid-template-areas:'clock' 'weather' 'notes';gap:7px}.ambient-home.has-notes .ambient-clock{padding:8px;gap:3px}.ambient-home .ambient-digits{font-size:clamp(30px,9vw,60px)}.ambient-home .ambient-label{font-size:11px}.ambient-home .clock-extra{display:none}.ambient-home .ambient-date{font-size:8px}.ambient-home .ambient-header{flex-basis:30px}.ambient-home .ambient-header strong{font-size:17px}.ambient-home .ambient-header small{display:none}.ambient-home .ambient-notes{padding:8px}.ambient-home .display-records-grid{grid-template-columns:minmax(0,.6fr) minmax(0,1.4fr);gap:8px}.ambient-home .display-lending{padding-left:8px}.ambient-home .display-loan-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Borrower directory and individual account */
+.borrower-list,.borrower-entries{display:grid;gap:10px}
+.loan-directory .borrower-link{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;padding:14px;text-align:left}
+.borrower-link:focus-visible,.borrower-link:hover{border-color:#41705c}
+.borrower-total{display:grid;gap:4px;text-align:right;flex-shrink:0;color:#903b29}
+.borrower-total small,.borrower-profile-totals small{display:block;font-size:.82rem}
+.borrower-total strong{font-size:clamp(.92rem,2vw,1.15rem);font-variant-numeric:tabular-nums}
+.is-settled .borrower-total{color:#356b50}
+.borrower-profile{display:grid;gap:16px;min-width:0}
+.borrower-profile>[data-loan=back]{justify-self:start}
+.borrower-profile-head{padding:clamp(14px,3vw,24px);background:#edf3fa;color:#243f56;border:1px solid #ccd9e6;border-radius:20px}
+.borrower-profile-head h2,.borrower-profile h3{margin:0}
+.borrower-profile-totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.borrower-profile-totals>div{padding:12px;border-radius:12px;background:#fff;overflow-wrap:anywhere}
+.borrower-profile-totals>div:first-child{grid-column:1/-1;background:#fff0e9;color:#903b29}
+.borrower-profile-totals strong{display:block;font-size:clamp(1.5rem,4vw,2.25rem)}
+.borrower-profile-head .button-row,.borrower-entries{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:8px}
+.borrower-profile .loan-entry,.borrower-profile .loan-history{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface,var(--bg));overflow-wrap:anywhere}
+.borrower-profile .loan-entry>div{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.borrower-profile .loan-entry p{margin:8px 0 0}
+.loan-entry-note{white-space:pre-wrap}
+.person-history,.loan-optional{padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+.person-history summary,.loan-optional summary{cursor:pointer;padding:6px 0}
+.loan-optional label,.person-history .loan-history{margin-top:10px}
+.person-suggestions[hidden]{display:none}
+.loan-description label{display:grid;gap:6px}
+.loan-description textarea{min-height:72px}
+.quick-memo-sheet textarea{min-height:clamp(110px,28dvh,230px)}
+
+/* Keep actions visible while native keyboards change the visual viewport. */
+dialog#sheet:not(.cash-fullscreen) .sheet-body{min-height:0;overflow:auto;overscroll-behavior:contain}
+dialog#sheet:not(.cash-fullscreen) :is(.sheet-head,.sheet-actions){flex-shrink:0}
+:root[data-keyboard-open] dialog#sheet[open]:not(.cash-fullscreen){
+ position:fixed;inset:var(--cash-top,0px) 0 auto;margin:0 auto;
+ max-height:var(--cash-vh,100dvh);display:flex;flex-direction:column;
+}
+:root[data-keyboard-open] dialog#sheet .sheet-actions{padding-block:8px}
+:root[data-keyboard-open] .quick-memo-sheet textarea{min-height:90px}
+button[data-act=weather][data-pending] svg{animation:weather-refresh .8s linear infinite}
+@keyframes weather-refresh{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){button[data-act=weather][data-pending] svg{animation:none}}
+:root[data-motion=off] button[data-act=weather][data-pending] svg{animation:none}
+
+/* Keep the repayment targets usable in the compact, fixed-height display. */
+.ambient-home .display-records-grid{
+ flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;align-content:start;
+}
+.ambient-home .display-lending loan-summary{overflow:visible}
+.ambient-home .display-loan-card{display:flex;flex-direction:column;min-width:0;background:#f6eee2;border:1px solid #e6d9c7;border-radius:12px}
+.ambient-home .display-loan-card .display-loan-row{width:100%;flex:1;background:transparent;border:0;box-shadow:none}
+.ambient-home .display-loan-card .display-loan-amounts{display:block}
+.ambient-home .display-repay-button{min-height:44px;margin:0 6px 6px;border-radius:9px;border:1px solid #d9c5af;background:#fffaf1;color:#8f3e2c;font-size:14px;font-weight:650}
+.ambient-home .display-repay-button:active{background:#eee0d0}
+.ambient-home .display-repay-button:focus-visible{outline:2px solid #a7442e;outline-offset:-3px}
+.display-repay-dialog[open]{animation:display-repay-open 300ms cubic-bezier(.2,.75,.25,1) both}
+.display-repay-dialog::backdrop{backdrop-filter:none}
+.display-repay-saved{animation:display-repay-saved 560ms ease-out}
+@keyframes display-repay-open{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes display-repay-saved{0%{background-color:#dfeedf}}
+@media(prefers-reduced-motion:reduce){.display-repay-dialog[open],.display-repay-saved{animation:none!important}}
+:root[data-motion=off] :is(.display-repay-dialog[open],.display-repay-saved){animation:none!important}
+
+.cash-workspace-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:min(100%,480px);margin:0 0 14px}
+.cash-workspace-tabs button{min-height:44px;white-space:nowrap}
+.cash-box-tabs{margin:14px 0}
+.cash-history-panel>.filter-input{width:100%;margin-bottom:12px}
+.cash-record-panel .cash-actions{margin-top:0}
+.cash-record-panel .task-action{min-width:0}
+.cash-record-panel .task-action>.icon:last-child{display:none}
+.ambient-header .ambient-cash{flex:none;min-height:38px;padding:4px 9px;white-space:nowrap}
+@media(max-width:420px){
+ .ambient-header .ambient-cash{min-height:36px;padding-inline:7px;font-size:12px}
+ .cash-record-panel .cash-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .cash-record-panel .task-action{padding:10px;min-height:70px;gap:8px}
+ .cash-record-panel .task-action small{display:none}
+}
+
+@media(max-width:700px){.ambient-home .ambient-header:has(.ambient-cash){flex-basis:38px}}
+
+.projector-hosted-link{display:inline-flex;align-items:center;min-height:44px;margin-top:10px;text-decoration:none}

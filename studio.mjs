@@ -4,9 +4,11 @@ const reduced=()=>document.documentElement.dataset.motion==='off'||matchMedia('(
 let origin=null,returnFocus=null,lastTrigger=null,selectOpen=null;
 const run=(el,frames,options)=>!reduced()&&el?.animate?el.animate(frames,options):null;
 export function sheetEnter(d,wasOpen){
+ if(!wasOpen)returnFocus=lastTrigger;
+ if(reduced())return;
  const rect=d.getBoundingClientRect();
- if(!wasOpen){returnFocus=lastTrigger;const dx=origin?origin.x-rect.x-rect.width/2:0,dy=origin?origin.y-rect.y-rect.height/2:30;
- run(d,[{opacity:0,transform:`translate(${dx*.25}px,${dy*.25}px) scale(.87)`},{opacity:1,transform:'translate(0,0) scale(1.012)',offset:.75},{opacity:1,transform:'none'}],{duration:360,easing:'cubic-bezier(.2,.8,.2,1)'});
+ if(!wasOpen){const dx=origin?origin.x-rect.x-rect.width/2:0,dy=origin?origin.y-rect.y-rect.height/2:30;
+ run(d,[{opacity:0,transform:`translate(${dx*.25}px,${dy*.25}px) scale(.87)`},{opacity:1,transform:'translate(0,0) scale(1.012)',offset:.75},{opacity:1,transform:'none'}],{duration:d.classList.contains('quick-memo-sheet')?480:410,easing:'cubic-bezier(.2,.8,.2,1)'});
  }else run(d.querySelector('.sheet-body'),[{opacity:.25,transform:'translateY(9px)'},{opacity:1,transform:'none'}],{duration:180,easing:'ease-out'});
  enhanceSelects(d);
 }
@@ -17,7 +19,7 @@ export function sheetExit(d){
   const r=d.getBoundingClientRect(),ghost=d.cloneNode(true);ghost.removeAttribute('id');ghost.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));ghost.removeAttribute('open');ghost.setAttribute('aria-hidden','true');ghost.inert=true;ghost.classList.add('sheet-ghost');
   Object.assign(ghost.style,{display:'flex',position:'fixed',margin:'0',left:r.x+'px',top:r.y+'px',width:r.width+'px',height:r.height+'px',pointerEvents:'none'});document.body.append(ghost);
   const dx=origin?(origin.x-r.x-r.width/2)*.18:0,dy=origin?(origin.y-r.y-r.height/2)*.18:28;
-  const a=run(ghost,[{opacity:1,transform:'none'},{opacity:0,transform:`translate(${dx}px,${dy}px) scale(.9)`}],{duration:220,easing:'cubic-bezier(.4,0,1,1)'});a?.finished.catch(()=>{}).finally(()=>ghost.remove());if(!a)ghost.remove();
+  const a=run(ghost,[{opacity:1,transform:'none'},{opacity:0,transform:`translate(${dx}px,${dy}px) scale(.9)`}],{duration:d.classList.contains('quick-memo-sheet')?280:220,easing:'cubic-bezier(.4,0,1,1)'});a?.finished.catch(()=>{}).finally(()=>ghost.remove());if(!a)ghost.remove();
  }
  d.close();if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});
 }
@@ -51,25 +53,20 @@ export function initStudio(){
  enhanceSelects();
 }
 
-// One transition owns a route change. Business data is never touched here.
-let activeTransition=null,launchRoute=null;
+// Animate the live page so controls can receive taps during the transition.
+let routeAnimation=null;
 export function routeTransition(draw,next){
- activeTransition?.skipTransition();
- document.querySelectorAll('.launch-surface').forEach(e=>e.classList.remove('launch-surface'));
- const from=document.body.dataset.page;
- const entering=['home','display'].includes(from)&&!['home','display'].includes(next);
- const exiting=!['home','display'].includes(from)&&['home','display'].includes(next);
- const source=entering?document.querySelector(`.dock-button[data-route="${next}"]`):exiting?document.querySelector('.page-title'):null;
- source?.classList.add('launch-surface');
- const apply=()=>{draw();const target=entering?document.querySelector('.page-title'):exiting?document.querySelector(`.dock-button[data-route="${from}"]`):null;target?.classList.add('launch-surface');};
- if(reduced()||!document.startViewTransition){apply();document.querySelectorAll('.launch-surface').forEach(e=>e.classList.remove('launch-surface'));return;}
- const transition=document.startViewTransition(apply);activeTransition=transition;
- transition.finished.catch(()=>{}).finally(()=>{if(activeTransition===transition){document.querySelectorAll('.launch-surface').forEach(e=>e.classList.remove('launch-surface'));activeTransition=null;}});
- return transition.updateCallbackDone;
+ routeAnimation?.cancel();
+ draw();
+ const main=document.querySelector('#main');
+ if(!main)return;
+ const offset=next==='display'?0:8;
+ routeAnimation=run(main,[{opacity:.82,transform:`translateY(${offset}px)`},{opacity:1,transform:'none'}],
+  {duration:340,easing:'cubic-bezier(.2,.8,.2,1)'});
 }
 
 // Delegated spring feedback; touch scrolling keeps native browser inertia.
 let pressed=null,pressAnimation=null;
-document.addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b||b.disabled||reduced())return;pressed=b;pressAnimation?.cancel();pressAnimation=run(b,[{transform:'scale(1)'},{transform:'scale(.965)'}],{duration:120,fill:'forwards',easing:'ease-out'});},{passive:true});
+document.addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b||b.disabled||!e.isPrimary||e.button!==0||reduced())return;pressed=b;pressAnimation?.cancel();pressAnimation=run(b,[{transform:'scale(1)'},{transform:'scale(.965)'}],{duration:120,fill:'forwards',easing:'ease-out'});},{passive:true});
 function release(){if(!pressed)return;pressAnimation?.cancel();if(!reduced()){const spring=springFrames();run(pressed,spring.frames,{duration:spring.duration,easing:'linear'});}pressed=null;}
-document.addEventListener('pointerup',release,{passive:true});document.addEventListener('pointercancel',release,{passive:true});
+document.addEventListener('pointerup',release,{passive:true});document.addEventListener('pointercancel',release,{passive:true});window.addEventListener('blur',release);

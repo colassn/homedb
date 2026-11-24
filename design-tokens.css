@@ -289,3 +289,31 @@ button[data-act=weather][data-pending] svg{animation:weather-refresh .8s linear 
 .ambient-home .ambient-note-content p,.ambient-home .ambient-note-content strong {display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 
 .ambient-home.has-notes .ambient-weather{overflow:auto}
+
+.settings-layout{display:grid;grid-template-columns:minmax(184px,.8fr) minmax(0,1.8fr);gap:clamp(12px,2vw,28px);align-items:start}
+.settings-menu,.settings-detail.panel{border:1px solid var(--line);border-radius:18px;background:var(--surface,#fffaf4);color:inherit}
+.settings-menu{overflow:hidden;padding:5px}
+.settings-menu button{display:flex;align-items:center;gap:10px;background:transparent;color:inherit;border:0;border-radius:10px;text-align:start;width:100%;min-height:54px;padding:8px 12px}
+.settings-menu button strong{flex:1}.settings-menu button small{color:var(--muted)}
+.settings-menu button[aria-current=true]{background:rgba(161,75,53,.10)}
+.settings-detail.panel{padding:clamp(16px,2.4vw,30px);min-width:0}
+.settings-detail .setting-row{min-height:52px;gap:12px}
+.settings-detail .field{margin-block:12px}
+.settings-detail h2{margin:0 0 12px}
+.settings-detail .settings-back{display:none}
+.settings-preview{display:grid;gap:5px;margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:14px}
+@media(max-width:799px),(orientation:portrait) and (max-width:1100px){
+ .settings-layout{display:block}
+ .settings-layout[data-detail=false] .settings-detail,.settings-layout[data-detail=true] .settings-menu{display:none}
+ .settings-detail .settings-back{display:inline-flex;min-height:44px}
+ .settings-menu button[aria-current=true]{background:transparent}
+}
+
+html[data-theme="light"] [data-page="home"] .tool-hub,
+html[data-theme="light"] .ambient-home.has-notes{
+ background-image:radial-gradient(ellipse at 92% 8%,rgba(216,172,107,.13),transparent 48%)
+}
+@media(prefers-reduced-motion:no-preference){
+ html:not([data-motion="off"]) .loan-dialog[open] .loan-editor-body{animation:loan-body-enter 180ms ease-out}
+ @keyframes loan-body-enter{from{opacity:.85;transform:translateY(6px)}}
+}

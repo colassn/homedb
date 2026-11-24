@@ -1,27 +1,18 @@
 import {springFrames,initAdaptiveEffects} from './motion-system.mjs';
 // Visual interactions only. No persistence, Firebase or record mutations here.
 const reduced=()=>document.documentElement.dataset.motion==='off'||matchMedia('(prefers-reduced-motion: reduce)').matches;
-let origin=null,returnFocus=null,lastTrigger=null,selectOpen=null;
+let returnFocus=null,lastTrigger=null,selectOpen=null;
 const run=(el,frames,options)=>!reduced()&&el?.animate?el.animate(frames,options):null;
 export function sheetEnter(d,wasOpen){
  if(!wasOpen)returnFocus=lastTrigger;
- if(reduced())return;
- const rect=d.getBoundingClientRect();
- if(!wasOpen){const dx=origin?origin.x-rect.x-rect.width/2:0,dy=origin?origin.y-rect.y-rect.height/2:30;
- run(d,[{opacity:0,transform:`translate(${dx*.25}px,${dy*.25}px) scale(.87)`},{opacity:1,transform:'translate(0,0) scale(1.012)',offset:.75},{opacity:1,transform:'none'}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'});
- }else run(d.querySelector('.sheet-body'),[{opacity:.25,transform:'translateY(9px)'},{opacity:1,transform:'none'}],{duration:180,easing:'ease-out'});
+ run(d.querySelector('.sheet-body'),[{opacity:.85,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:180,easing:'ease-out'});
  enhanceSelects(d);
 }
 export function sheetExit(d){
  closeSelect();
  if(!d.open)return;
- if(!reduced()){
-  const r=d.getBoundingClientRect(),ghost=d.cloneNode(true);ghost.removeAttribute('id');ghost.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));ghost.removeAttribute('open');ghost.setAttribute('aria-hidden','true');ghost.inert=true;ghost.classList.add('sheet-ghost');
-  Object.assign(ghost.style,{display:'flex',position:'fixed',margin:'0',left:r.x+'px',top:r.y+'px',width:r.width+'px',height:r.height+'px',pointerEvents:'none'});document.body.append(ghost);
-  const dx=origin?(origin.x-r.x-r.width/2)*.18:0,dy=origin?(origin.y-r.y-r.height/2)*.18:28;
-  const a=run(ghost,[{opacity:1,transform:'none'},{opacity:0,transform:`translate(${dx}px,${dy}px) scale(.9)`}],{duration:d.classList.contains('quick-memo-sheet')?280:220,easing:'cubic-bezier(.4,0,1,1)'});a?.finished.catch(()=>{}).finally(()=>ghost.remove());if(!a)ghost.remove();
- }
- d.close();if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});
+ d.close();
+ if(returnFocus?.isConnected&&document.activeElement!==returnFocus)returnFocus.focus({preventScroll:true});
 }
 export function numberPop(el){run(el,[{transform:'translateY(5px)',opacity:.45},{transform:'translateY(-2px)',opacity:1,offset:.75},{transform:'none',opacity:1}],{duration:180,easing:'ease-out'});}
 function closeSelect(){if(selectOpen){selectOpen.list.hidden=true;selectOpen.trigger.setAttribute('aria-expanded','false');selectOpen=null;}}
@@ -42,9 +33,8 @@ export function enhanceSelects(root=document){
 }
 export function initStudio(){
  initAdaptiveEffects();
- document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.closest('#sheet')){lastTrigger=b;const r=b.getBoundingClientRect();origin={x:r.x+r.width/2,y:r.y+r.height/2};}},true);
+ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.closest('#sheet'))lastTrigger=b;},true);
  document.addEventListener('pointerdown',e=>{if(selectOpen&&!selectOpen.wrap.contains(e.target))closeSelect();const b=e.target.closest('button');if(!b||b.disabled)return;
-  if(!b.closest('#sheet')){const r=b.getBoundingClientRect();origin={x:r.x+r.width/2,y:r.y+r.height/2};}
   if(reduced())return;const r=b.getBoundingClientRect(),ink=document.createElement('span');ink.className='touch-ring';ink.setAttribute('aria-hidden','true');ink.style.left=(e.clientX-r.left)+'px';ink.style.top=(e.clientY-r.top)+'px';b.append(ink);setTimeout(()=>ink.remove(),550);
  },true);
  let raf=0;document.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||reduced()||raf)return;const b=e.target.closest('.dock-button,.tool-card,.sd-card');if(!b)return;raf=requestAnimationFrame(()=>{const r=b.getBoundingClientRect();b.style.setProperty('--pointer-x',((e.clientX-r.x)/r.width*100)+'%');b.style.setProperty('--pointer-y',((e.clientY-r.y)/r.height*100)+'%');raf=0;});},{passive:true});

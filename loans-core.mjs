@@ -7,5 +7,5 @@ const loans=events.filter(e=>e.type==='lend'&&!voids.has(e.id)).map(e=>({...e,pa
 let total=0;for(const l of loans){total+=l.amount;if(!Number.isSafeInteger(total))throw Error('總金額超出範圍');}return {loans,voids,total,paid:loans.reduce((s,l)=>s+l.paid,0),balance:loans.reduce((s,l)=>s+l.balance,0)};}
 export function allocate(events,person,amount,at,loanId=''){let left=amount;const parts=[];for(const l of ledger(events).loans.filter(l=>l.person===person&&l.balance>0&&l.at<=at&&(!loanId||l.id===loanId)).sort((a,b)=>a.at-b.at||a.id.localeCompare(b.id))){const n=Math.min(left,l.balance);if(n)parts.push({loan:l.id,amount:n});left-=n;}if(left||amount<=0)throw Error('還款超過可分配餘額，或日期早於借款');return parts;}
 
-// Preserve the existing person's exact spelling when a normalized name matches.
-export function resolvePerson(value,events=[]){const name=String(value??'').trim().normalize('NFKC');return events.find(e=>e.type==='lend'&&e.person.trim().normalize('NFKC')===name)?.person||name;}
+// The legacy account key is the exact stored person string.
+export function resolvePerson(value,events=[]){const raw=String(value??'');if(events.some(e=>e.type==='lend'&&e.person===raw))return raw;return raw.trim();}

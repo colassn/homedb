@@ -273,3 +273,19 @@ button[data-act=weather][data-pending] svg{animation:weather-refresh .8s linear 
 
 @media(max-width:700px){.ambient-home .ambient-header:has(.ambient-cash){flex-basis:38px}}
 
+
+.borrower-list > .borrower-profile {grid-column:1/-1;min-width:0}
+.person-history .loan-history {padding:12px 16px;border-radius:14px;margin-block:8px;background:var(--surface,#fff);border-inline-start:4px solid #b39b76}
+.person-history .history-repay {border-inline-start-color:#599581}
+.entry-added {outline:2px solid #629d82;animation:entry-arrival 800ms ease-out forwards}
+@keyframes entry-arrival {from {background:#dbefdf}to {outline-color:transparent}}
+@media(prefers-reduced-motion:no-preference){
+ html:not([data-motion="off"]) .borrower-profile-head {animation:profile-arrival 220ms ease-out}
+ @keyframes profile-arrival {from {opacity:.75;transform:translateY(4px)}}
+}
+@media(prefers-reduced-motion:reduce){.entry-added {animation:none}}
+.hub-apps button:active,.tool-hub .button-row button:active,.borrower-list button:active {opacity:.78;transition:opacity 120ms}
+.ambient-home .display-loan-row b {display:block;font-size:16px}
+.ambient-home .ambient-note-content p,.ambient-home .ambient-note-content strong {display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+
+.ambient-home.has-notes .ambient-weather{overflow:auto}

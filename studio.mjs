@@ -8,7 +8,7 @@ export function sheetEnter(d,wasOpen){
  if(reduced())return;
  const rect=d.getBoundingClientRect();
  if(!wasOpen){const dx=origin?origin.x-rect.x-rect.width/2:0,dy=origin?origin.y-rect.y-rect.height/2:30;
- run(d,[{opacity:0,transform:`translate(${dx*.25}px,${dy*.25}px) scale(.87)`},{opacity:1,transform:'translate(0,0) scale(1.012)',offset:.75},{opacity:1,transform:'none'}],{duration:d.classList.contains('quick-memo-sheet')?480:410,easing:'cubic-bezier(.2,.8,.2,1)'});
+ run(d,[{opacity:0,transform:`translate(${dx*.25}px,${dy*.25}px) scale(.87)`},{opacity:1,transform:'translate(0,0) scale(1.012)',offset:.75},{opacity:1,transform:'none'}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'});
  }else run(d.querySelector('.sheet-body'),[{opacity:.25,transform:'translateY(9px)'},{opacity:1,transform:'none'}],{duration:180,easing:'ease-out'});
  enhanceSelects(d);
 }
@@ -62,7 +62,7 @@ export function routeTransition(draw,next){
  if(!main)return;
  const offset=next==='display'?0:8;
  routeAnimation=run(main,[{opacity:.82,transform:`translateY(${offset}px)`},{opacity:1,transform:'none'}],
-  {duration:340,easing:'cubic-bezier(.2,.8,.2,1)'});
+  {duration:240,easing:'cubic-bezier(.2,.8,.2,1)'});
 }
 
 // Delegated spring feedback; touch scrolling keeps native browser inertia.

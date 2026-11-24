@@ -317,3 +317,24 @@ html[data-theme="light"] .ambient-home.has-notes{
  html:not([data-motion="off"]) .loan-dialog[open] .loan-editor-body{animation:loan-body-enter 180ms ease-out}
  @keyframes loan-body-enter{from{opacity:.85;transform:translateY(6px)}}
 }
+
+.settings-menu .settings-search{width:calc(100% - 16px);margin:8px;padding-inline:12px}
+.settings-menu [hidden]{display:none}
+.settings-empty{margin:12px;color:var(--muted)}
+:where(button,input,textarea,summary):focus-visible{outline:2px solid currentColor;outline-offset:2px}
+body[data-page=home]>.ambient-glow,body[data-page=display]>.ambient-glow{
+ display:block;position:fixed;inset:0 0 auto auto;width:min(72vw,680px);height:min(16vh,150px);
+ z-index:2;pointer-events:none;background:radial-gradient(ellipse at 80% 0%,rgba(159,178,176,.13),transparent 68%);
+}
+.ambient-glow canvas{width:100%;height:100%;opacity:.12;pointer-events:none}
+html[data-effects=simple] .touch-ring{display:none}
+#cash-results{display:contents}
+@media(prefers-reduced-motion:no-preference){
+ html[data-motion=on] .settings-menu button{transition:background-color 150ms ease}
+}
+.ambient-home .ambient-header small{display:block;font-variant-numeric:tabular-nums;line-height:1.2}
+#sheet .sheet-head{touch-action:pan-x}
+html[data-theme=light] .settings-menu button[aria-current=true]{background-color:#ecf1ee}
+html[data-theme=light] .loan-overview,html[data-theme=light] .settings-detail.panel{background-color:#fafbf9}
+html[data-theme=light] .borrower-card.is-outstanding .borrower-total small{color:#805026}
+html[data-theme=light] .borrower-card.is-settled .borrower-total small{color:#38644e}

@@ -1,4 +1,5 @@
-import {enhanceSelects} from './studio.mjs';
+import {aliases,groupedName,joinGroup,separateGroup} from './borrower-groups.mjs';
+import {transitionBox,enhanceSelects} from './studio.mjs';
 import{ledger,mergeLoans,cents,allocate,resolvePerson}from'./loans-core.mjs';
 const KEY='pos-loan-ledger',PENDING='pos-loan-pending',OP='pos-loan-event:',esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),money=n=>'HK$ '+(n/100).toLocaleString('en-HK',{minimumFractionDigits:2,maximumFractionDigits:2}),date=n=>new Date(n).toLocaleString('zh-HK',{timeZone:'Asia/Hong_Kong',hour12:false}),nowInput=()=>new Date(Date.now()+28800000).toISOString().slice(0,16),parseTime=v=>{const n=Date.parse(v+':00+08:00');if(!Number.isFinite(n))throw Error('請填寫有效日期時間');return n;};
 let confirmedIds=new Set();
@@ -22,47 +23,58 @@ draw(){
  let events,data;
  try{events=readLoans();data=ledger(events);}
  catch(e){this.innerHTML=`<p role="alert">${esc(e.message)}。已停止寫入，請先匯出完整備份。</p>`;return;}
- const people=[...new Set(events.filter(e=>e.type==='lend').map(e=>e.person))].map(name=>{
-  const loans=data.loans.filter(l=>l.person===name);
-  return {name,loans,balance:loans.reduce((sum,l)=>sum+l.balance,0),
-   latest:Math.max(...events.filter(e=>e.person===name).map(e=>e.at)),
+ const names=[...new Set(events.filter(e=>e.type==='lend').map(e=>e.person))];
+ const groups=aliases();
+ const people=[...new Set(names.map(name=>groupedName(name,groups)))].map(name=>{
+  const members=names.filter(n=>groupedName(n,groups)===name);
+  const loans=data.loans.filter(l=>members.includes(l.person));
+  return {name,members,loans,balance:loans.reduce((sum,l)=>sum+l.balance,0),
+   latest:events.reduce((last,e)=>members.includes(e.person)?Math.max(last,e.at):last,0),
    due:loans.filter(l=>l.balance&&l.due).map(l=>l.due).sort()[0]||'9999'};
  });
  const today=new Date(Date.now()+28800000).toISOString().slice(0,10);
- const p=people.find(person=>person.name===this.person);
- const shown=people.filter(person=>person===p||(this.filter==='all'||(this.filter==='open'?person.balance>0:person.balance===0))&&person.name.toLowerCase().includes(this.query.toLowerCase()));
- shown.sort((a,b)=>Number(!a.balance)-Number(!b.balance)||(this.sort==='amount'?b.balance-a.balance:this.sort==='due'?a.due.localeCompare(b.due):b.latest-a.latest));
- const historyOpen=this.querySelector('.person-history')?.open;
- this.innerHTML=(`
+ const p=people.find(person=>person.members.includes(this.person));
+ const filtering=document.activeElement?.id==="loan-search" && this.contains(document.activeElement);
+ if(!filtering)this.innerHTML=(`
   <div class="page-title"><h2>借款紀錄</h2><button class="primary" data-loan="lend">＋ 新增借款</button></div>
   <section class="loan-overview" aria-label="借還款總覽"><div class="loan-section-heading"><div><h2>借還款總覽</h2></div></div><div class="loan-stats"><article><small>尚未收回</small><strong>${money(data.balance)}</strong></article><article><small>已收回</small><strong>${money(data.paid)}</strong></article><article><small>未還人數 / 逾期筆數</small><strong>${people.filter(p=>p.balance).length} / ${data.loans.filter(l=>l.balance&&l.due&&l.due<today).length}</strong></article></div><div class="loan-sync"><span data-loan-status role="status">${esc(status)}</span><button data-loan="sync" class="text-button">重試同步</button></div></section>
   <section class="loan-directory" aria-label="借款人">
-   <div class="loan-section-heading"><h2>借款人</h2><b>${shown.length} 人</b></div>
+   <div class="loan-section-heading"><h2>借款人</h2><b></b></div>
    <div class="loan-toolbar"><label>搜尋借款人<input id="loan-search" value="${esc(this.query)}" placeholder="輸入姓名"></label><div class="segmented">${[['open','未還清'],['closed','已還清'],['all','全部']].map(([v,t])=>`<button data-loan="filter" data-value="${v}" class="${this.filter===v?'selected':''}" aria-pressed="${this.filter===v}">${t}</button>`).join('')}</div><label>排序<select id="loan-sort">${[['recent','最近借款'],['amount','未還金額'],['due','到期日']].map(([v,t])=>`<option value="${v}" ${this.sort===v?'selected':''}>${t}</option>`).join('')}</select></label></div>
-   <div class="borrower-list">
-    ${shown.map(person=>person===p?this.profile(p,events,data,today,true):`<button type="button" class="borrower-card borrower-link ${person.balance?'is-outstanding':'is-settled'}" data-loan="person" data-person="${esc(person.name)}">
+   <div class="borrower-list"></div>
+  </section>`)+`<dialog class="loan-dialog" aria-label="借款紀錄表單"></dialog>`;
+ const refreshList=()=>{
+ const shown=people.filter(person=>person===p||(this.filter==='all'||(this.filter==='open'?person.balance>0:person.balance===0))&&person.members.some(name=>name.toLowerCase().includes(this.query.toLowerCase())));
+ shown.sort((a,b)=>Number(!a.balance)-Number(!b.balance)||(this.sort==='amount'?b.balance-a.balance:this.sort==='due'?a.due.localeCompare(b.due):b.latest-a.latest));
+  this.querySelector('.loan-directory .loan-section-heading b').textContent=shown.length+' 人';
+  const list=this.querySelector('.borrower-list');
+  list.innerHTML=shown.map(person=>person===p?this.profile(p,events,data):`<button type="button" class="borrower-card borrower-link ${person.balance?'is-outstanding':'is-settled'}" data-loan="person" data-person="${esc(person.name)}">
      <span class="borrower-identity"><span class="borrower-avatar" aria-hidden="true">${esc(person.name.slice(0,1))}</span>
      <span><strong>${esc(person.name)}</strong><small>${person.loans.length} 筆借款 · 查看個人紀錄</small></span></span>
      <span class="borrower-total"><small>${person.balance?'尚欠':'已還清'}</small><strong>${money(person.balance)}</strong></span>
-    </button>`).join('')||'<p class="loan-empty">未有符合條件嘅借款人。</p>'}
-   </div>
-  </section>`)+`<dialog class="loan-dialog" aria-label="借款紀錄表單"></dialog>`;
- this.querySelectorAll('[data-loan]').forEach(b=>b.onclick=()=>this.action(b));
+    </button>`).join('')||'<p class="loan-empty">未有符合條件嘅借款人。</p>';
+ };
+ refreshList();
+ if(filtering){const stats=this.querySelectorAll(".loan-stats strong");stats[0].textContent=money(data.balance);stats[1].textContent=money(data.paid);stats[2].textContent=people.filter(p=>p.balance).length+" / "+data.loans.filter(l=>l.balance&&l.due&&l.due<today).length;this.refreshStatus();}
+ this.onclick=e=>{
+  const button=e.target.closest('[data-loan]');
+  if(button&&this.contains(button))this.action(button);
+ };
  const search=this.querySelector('#loan-search');
  if(search){
   search.oninput=e=>{
-   const pos=e.target.selectionStart;
    this.query=e.target.value;
-   this.draw();
-   const input=this.querySelector('#loan-search');
-   input.focus();
-   input.setSelectionRange(pos,pos);
+   refreshList();
   };
-  this.querySelector('#loan-sort').onchange=e=>{this.sort=e.target.value;this.draw();};
+  this.querySelector('#loan-sort').onchange=e=>{
+   const positions=new Map([...this.querySelectorAll('.borrower-link')].map(b=>[b.dataset.person,b.getBoundingClientRect()]));
+   this.sort=e.target.value;this.draw();
+   this.querySelectorAll('.borrower-link').forEach(b=>transitionBox(b,positions.get(b.dataset.person)));
+  };
  }
  enhanceSelects(this);
 }
-profile(p,events,data,today,historyOpen){
+profile(p,events,data){
  const {name,loans,balance}=p;
  return `<section class="borrower-profile" aria-label="借款人個人紀錄">
   <button class="secondary" data-loan="back">返回借款人</button>
@@ -73,35 +85,57 @@ profile(p,events,data,today,historyOpen){
     <div><small>累計借出</small><b>${money(loans.reduce((sum,l)=>sum+l.amount,0))}</b></div>
     <div><small>已還</small><b>${money(loans.reduce((sum,l)=>sum+l.paid,0))}</b></div>
    </div>
-   <div class="button-row"><button class="primary" data-loan="lend" data-person="${esc(name)}">＋ 再借出</button>
-    <button class="secondary" data-loan="repay" ${balance?'':'disabled'}>記錄還款</button></div>
+   <progress class="sp-person-progress" aria-label="個人還款進度" value="${loans.reduce((n,l)=>n+l.paid,0)}" max="${loans.reduce((n,l)=>n+l.amount,0)||1}"></progress><div class="button-row"><button class="primary" data-loan="lend" data-person="${esc(name)}">＋ 再借出</button>
+    ${p.members.length>1?p.members.filter(n=>loans.some(l=>l.person===n&&l.balance)).map(n=>`<button class="secondary" data-loan="repay" data-person="${esc(n)}">${esc(n)} · 還款</button>`).join(''):`<button class="secondary" data-loan="repay" ${balance?'':'disabled'}>記錄還款</button>`}</div>
   </div>
+  <details class="sp-identity"><summary>管理同一人嘅姓名</summary><p>合併本裝置嘅個人檔案顯示。原始姓名、借款及還款分配均會保留。</p>
+   ${p.members.length>1?`<p>${p.members.map(esc).join('、')}</p><button type="button" class="secondary" data-loan="split-group" data-person="${esc(name)}">分開顯示</button>`:''}
+   <label>另一個姓名<select data-group-source><option value="">選擇借款人</option>${[...new Set(data.loans.map(l=>l.person))].filter(n=>!p.members.includes(n)).map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('')}</select></label>
+   <button class="secondary" data-loan="group" data-person="${esc(name)}">核對合併</button></details>
   <h3>借還款明細</h3><div class="person-history">
-   ${events.filter(e=>e.person===p.name||e.type==='void'&&events.find(t=>t.id===e.target)?.person===p.name).sort((a,b)=>b.recorded-a.recorded).map(e=>`<article class="loan-history history-${e.type} ${this.fresh===e.id?'entry-added':''}"><div><strong>${e.type==='lend'?'借出':e.type==='repay'?'還款':'作廢紀錄'} ${e.amount?money(e.amount):''}</strong>${data.voids.has(e.id)?'<span> · 已作廢</span>':''}</div>${e.type==='lend'?`<p>${e.due?'到期 '+esc(e.due)+' · ':''}${data.voids.has(e.id)?'':'尚欠 '+money(data.loans.find(l=>l.id===e.id).balance)}</p>`:''}<small>實際 ${date(e.at)}<br>登記 ${date(e.recorded)}</small><p>${esc(e.method||'')}${e.note?' · '+esc(e.note):''}</p>${e.type!=='void'&&!data.voids.has(e.id)?`<button class="text-button" data-loan="void" data-id="${e.id}">作廢／更正</button>`:''}</article>`).join('')}
+   ${events.filter(e=>p.members.includes(e.person)||e.type==='void'&&p.members.includes(events.find(t=>t.id===e.target)?.person)).sort((a,b)=>b.recorded-a.recorded).map(e=>`<article class="loan-history history-${e.type} ${this.fresh===e.id?'entry-added':''}"><div><strong>${e.type==='lend'?'借出':e.type==='repay'?'還款':'作廢紀錄'} ${e.amount?money(e.amount):''}</strong>${data.voids.has(e.id)?'<span> · 已作廢</span>':''}</div>${e.type==='lend'?`<p>${e.due?'到期 '+esc(e.due)+' · ':''}${data.voids.has(e.id)?'':'尚欠 '+money(data.loans.find(l=>l.id===e.id).balance)}</p>`:''}<small>實際 ${date(e.at)}<br>登記 ${date(e.recorded)}</small><p>${esc(e.method||'')}${e.note?' · '+esc(e.note):''}</p>${e.type!=='void'&&!data.voids.has(e.id)?`<button class="text-button" data-loan="void" data-id="${e.id}">作廢／更正</button>`:''}</article>`).join('')}
   </div>
   <div class="loan-sync"><span data-loan-status role="status">${esc(status)}</span><button data-loan="sync" class="text-button">重試同步</button></div>
  </section>`;
 }
 async action(b){
  const action=b.dataset.loan;
- if(action==='filter'){
+ if(action==='group'||action==='split-group'){
+  const target=b.dataset.person,source=this.querySelector('[data-group-source]')?.value;
+  if(action==='group'&&!source){this.querySelector('[data-group-source] + .custom-select button')?.focus();return;}
+  const dialog=this.querySelector('dialog');
+  dialog.innerHTML=`<form method="dialog" class="sp-confirm"><h2>核對姓名分組</h2><p>${action==='group'?`將「${esc(source)}」合併顯示於「${esc(target)}」個人檔案。`:`將「${esc(target)}」嘅姓名分開顯示。`}</p><button class="secondary" value="cancel">取消</button> <button class="primary" value="ok">確認</button><p role="alert"></p></form>`;
+  dialog.showModal();
+  dialog.querySelector('form').onsubmit=e=>{
+   if(e.submitter?.value!=='ok')return;
+   e.preventDefault();
+   try{
+    if(action==='group')joinGroup(source,target,readLoans().filter(e=>e.type==='lend').map(e=>e.person));
+    else separateGroup(target);
+    dialog.close();this.person=target;this.draw();window.dispatchEvent(new Event('loanschanged'));
+   }catch(err){dialog.querySelector('[role=alert]').textContent=err.message;}
+  };
+ }else if(action==='filter'){
   this.filter=b.dataset.value;
   this.draw();
   this.querySelector('[data-loan="filter"].selected')?.focus({preventScroll:true});
  }else if(action==='person'||action==='back'){
+  const origin=(action==='person'?b:this.querySelector('.borrower-profile-head'))?.getBoundingClientRect();
   const previous=this.person;if(action==='person')this.listY=scrollY;
   this.person=action==='person'?b.dataset.person:'';
   this.draw();
   const target=this.person?this.querySelector('.borrower-profile-head'):[...this.querySelectorAll('.borrower-link')].find(link=>link.dataset.person===previous)||this.querySelector('[data-loan="lend"]');
+  transitionBox(target,origin);
   target?.focus({preventScroll:true});
   if(this.person||this.listY===null)target?.scrollIntoView({block:'nearest'});else scrollTo(0,this.listY);
  }else if(action==='sync'){
   await syncLoans();
  }else{
+  if(action==='repay')this.person=b.dataset.person||this.person;
   this.editor(action,b.dataset.id,action==='lend'?b.dataset.person:'');
  }
 }
-editor(type,id,prefill=''){const events=readLoans(),data=ledger(events),d=this.querySelector('dialog'),isRepay=type==='repay',isVoid=type==='void',fromDisplay=this.hasAttribute('data-display-editor');if(d.open)return;const names=[...new Set([...events].reverse().filter(e=>e.type==='lend').map(e=>e.person))];const field=(name,label,input)=>`<label>${label}${input}</label>`;d.innerHTML=`<form class="loan-editor-form"><header><h2>${isVoid?'作廢紀錄':isRepay?'記錄還款':'新增借款'}</h2><button type="button" data-close aria-label="關閉">×</button></header><div class="loan-editor-body">${!isVoid?isRepay?`<p>借款人：<strong>${esc(this.person)}</strong></p>`:field('person','借款人',`<input name="person" required maxlength="100" autocomplete="off" value="${esc(prefill)}" ${prefill?'readonly':names.length?'':'autofocus'} placeholder="輸入新姓名，或揀下方已有借款人" aria-describedby="person-match-hint">`):'<p>原紀錄仍會保留。如借款已有還款，需先作廢相關還款。</p>'}${!isVoid&&!isRepay?'<div class="person-suggestions" aria-label="已有借款人"></div><p id="person-match-hint" class="person-match-hint" aria-live="polite"></p>':''}${!isVoid?field('amount',isRepay?'今次收到金額（HK$）':'借出金額（HK$）','<input name="amount" inputmode="decimal" required placeholder="0.00" autocomplete="off"><button type="button" class="keypad-toggle" aria-expanded="false">開啟數字鍵盤</button><div class="amount-keypad" hidden role="group" aria-label="金額數字鍵盤"><button type="button" data-digit="1">1</button><button type="button" data-digit="2">2</button><button type="button" data-digit="3">3</button><button type="button" data-digit="4">4</button><button type="button" data-digit="5">5</button><button type="button" data-digit="6">6</button><button type="button" data-digit="7">7</button><button type="button" data-digit="8">8</button><button type="button" data-digit="9">9</button><button type="button" data-digit=".">.</button><button type="button" data-digit="0">0</button><button type="button" data-digit="back">⌫</button><button type="button" data-digit="clear">清除</button><button type="button" data-digit="done">完成輸入</button></div>'): ''}
+editor(type,id,prefill=''){const events=readLoans(),data=ledger(events),d=this.querySelector('dialog'),isRepay=type==='repay',isVoid=type==='void',fromDisplay=this.hasAttribute('data-display-editor');if(d.open)return;const names=[...new Set([...events].reverse().filter(e=>e.type==='lend').map(e=>e.person))];const field=(name,label,input)=>`<label>${label}${input}</label>`;d.innerHTML=`<form class="loan-editor-form"><header><h2>${isVoid?'作廢紀錄':isRepay?'記錄還款':'新增借款'}</h2><button type="button" data-close aria-label="關閉">×</button></header><div class="loan-editor-body">${!isVoid?isRepay?`<p>借款人：<strong>${esc(this.person)}</strong></p>`:field('person','借款人',`<input name="person" required maxlength="100" autocomplete="off" value="${esc(prefill)}" ${prefill?'readonly':''} placeholder="輸入新姓名，或揀下方已有借款人" aria-describedby="person-match-hint">`):'<p>原紀錄仍會保留。如借款已有還款，需先作廢相關還款。</p>'}${!isVoid&&!isRepay?'<div class="person-suggestions" aria-label="已有借款人"></div><p id="person-match-hint" class="person-match-hint" aria-live="polite"></p>':''}${!isVoid?field('amount',isRepay?'今次收到金額（HK$）':'借出金額（HK$）','<input name="amount" inputmode="decimal" required placeholder="0.00" autocomplete="off"><button type="button" class="keypad-toggle" aria-expanded="false">開啟數字鍵盤</button><div class="amount-keypad" hidden role="group" aria-label="金額數字鍵盤"><button type="button" data-digit="1">1</button><button type="button" data-digit="2">2</button><button type="button" data-digit="3">3</button><button type="button" data-digit="4">4</button><button type="button" data-digit="5">5</button><button type="button" data-digit="6">6</button><button type="button" data-digit="7">7</button><button type="button" data-digit="8">8</button><button type="button" data-digit="9">9</button><button type="button" data-digit=".">.</button><button type="button" data-digit="0">0</button><button type="button" data-digit="back">⌫</button><button type="button" data-digit="clear">清除</button><button type="button" data-digit="done">完成輸入</button></div>'): ''}
 ${field('note',isVoid?'作廢原因（必填）':isRepay?'備註（選填）':'借款說明（選填）',
  `<textarea name="note" rows="2" maxlength="1000" ${isVoid?'required':'placeholder="例如午餐、代墊車費"'}></textarea>`)}
 ${!isVoid?`${isRepay?'':'<details class="loan-optional"><summary>日期及到期日</summary>'}
@@ -120,12 +154,10 @@ fit();viewport?.addEventListener('resize',scheduleFit);viewport?.addEventListene
 d.addEventListener('close',()=>{viewport?.removeEventListener('resize',scheduleFit);viewport?.removeEventListener('scroll',scheduleFit);cancelAnimationFrame(frame);},{once:true});
 let saving=false;
 const dismiss=()=>{if(!saving){d.close();this.draw();}};
-if(prefill||isRepay)d.querySelector('[name=amount]').autofocus=true;
-else if(isVoid)d.querySelector('[name=note]').autofocus=true;
-else if(names.length)d.querySelector('[data-close]').autofocus=true;
+d.querySelector('[data-close]').autofocus=true;
 d.showModal();
 d.querySelector('[data-close]').onclick=dismiss;
-d.addEventListener('cancel',ev=>{ev.preventDefault();dismiss();});
+d.oncancel=ev=>{ev.preventDefault();dismiss();};
 let pending=null;const form=d.querySelector('form');form.addEventListener('invalid',e=>{const details=e.target.closest('details');if(details)details.open=true;},true);const amountInput=form.elements.amount,keypad=form.querySelector('.amount-keypad'),toggle=form.querySelector('.keypad-toggle');if(isRepay){
  const full=document.createElement('button');full.type='button';full.className='secondary';full.textContent='全數還款';
  amountInput.after(full);full.onclick=()=>{form.elements.loan.value='';amountInput.value=(data.loans.filter(l=>l.person===this.person).reduce((sum,l)=>sum+l.balance,0)/100).toFixed(2);amountInput.dispatchEvent(new Event('input',{bubbles:true}));};
@@ -185,6 +217,7 @@ class LoanSummary extends HTMLElement {
    const open=data.loans.filter(l=>l.balance>0).sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999')||a.at-b.at);
    const masked=this.hasAttribute('private');
    html=`<div class="display-loan-head" tabindex="-1"><strong>未還借款 · ${open.length} 筆</strong><span>${masked?'金額已隱藏':money(data.balance)}</span></div>`;
+   if(!masked)html+=`<small class="sp-display-totals">累計借出 ${money(data.total)} · 已收回 ${money(data.paid)}</small>`;
    if(masked)html+='<p>私隱模式 · 人物及金額已隱藏</p>';
    else if(!open.length)html+='<p class="display-loan-empty">暫時冇未還借款</p>';
    else{

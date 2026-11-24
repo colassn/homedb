@@ -1,0 +1,148 @@
+/* Shared tokens for the shell, dashboard and native controls. */
+:root{
+ --forest:#092e29;--mint:#a8e8d2;--mist:#dcece5;--peach:#f4c7aa;
+ --motion-page:260ms;--motion-panel:240ms;--sp-gap:clamp(12px,1.4vw,22px);
+ --sp-pad:clamp(16px,2vw,28px);--shadow-panel:0 6px 24px #12392f09;
+}
+html[data-theme=light]{
+ --bg:#f8faf9;--surface:#fff;--surface2:#eaf3ef;--ink:#172622;--muted:#536861;
+ --accent:#10624e;--line:#dce6e1;--glass:#ffffffda;--green:#176449;
+}
+html[data-theme=light] body{
+ background:radial-gradient(ellipse at 17% 5%,#cbe9de 0,transparent 47%),
+ radial-gradient(ellipse at 92% 28%,#f3ded1 0,transparent 39%),
+ radial-gradient(ellipse at 68% 90%,#dce8ef 0,transparent 48%),var(--bg);
+ background-attachment:fixed;
+}
+.shell .workspace,html[data-theme=light] .workspace{background:transparent;min-width:0}
+.shell .topbar{background:transparent;backdrop-filter:none}
+.sp-heading,.sp-card header,.sp-caption{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sp-heading{margin:18px 0 var(--sp-gap)}
+.sp-heading h1{margin:0;line-height:1.18;font-size:var(--type-h1)}
+.sp-heading small,.sp-card small,.sp-caption,.sp-card>p{color:var(--muted)}
+.sp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-gap);align-items:stretch}
+.sp-grid>*{min-width:0;border-radius:var(--radius-panel);overflow-wrap:anywhere}
+.sp-card,.sp-grid>.weather-panel,.sp-grid>.time-panel{padding:var(--sp-pad);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-panel);color:var(--ink)}
+.sp-card h2{font-size:18px;margin:0 0 10px}
+.sp-card header h2{margin:0}.sp-card header{margin-bottom:12px}
+.sp-card .recent-row{width:100%;text-align:start;min-height:44px}.sp-card .recent-row small{display:block}
+.sp-cash,.sp-loans{grid-column:span 2}
+.sp-cash{position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;gap:16px;padding:var(--sp-pad);background:var(--forest);color:white}
+.sp-cash::after{content:"";position:absolute;z-index:-1;inset:0;pointer-events:none;background:repeating-radial-gradient(ellipse at 110% 140%,transparent 0 15px,#a8e8d21f 16px,transparent 17px 24px);mask-image:linear-gradient(100deg,transparent 14%,black)}
+.sp-cash strong,.sp-loan-grid strong{font-family:Outfit,PersonalTC,sans-serif;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.sp-cash strong{font-size:clamp(36px,5vw,72px);line-height:1.1}
+.sp-cash button{border-radius:12px;background:var(--mint);color:var(--forest);padding:8px 16px;min-height:44px;border:0}
+.sp-cash button+button{background:#ffffff18;color:white;border:1px solid #ffffff40}
+.sp-days{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font:500 clamp(12px,1vw,15px)/1.65 Outfit,sans-serif}
+.sp-days [aria-current]{background:var(--mint);color:var(--forest);border-radius:8px}
+.sp-loan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.sp-loan-grid strong{display:block;font-size:clamp(18px,2.5vw,36px)}
+.sp-track{height:8px;background:var(--surface2);border-radius:8px;overflow:hidden;margin:20px 0 8px}
+.sp-track i{display:block;height:100%;transform-origin:left;background:#37a882;transition:transform 280ms var(--ease-standard)}
+.sp-caption{font-size:13px}.sp-person-progress{width:100%;height:8px;accent-color:#258768}
+html[data-theme=light] .sp-notes{background:#f1f7f4}
+html[data-theme=light] .loan-overview,html[data-theme=light] .ambient-clock{background:var(--forest);color:white}
+html[data-theme=light] .ambient-clock :is(.ambient-date,.ambient-label,.clock-extra){color:#c4e2d6}
+html[data-theme=light] .ambient-home{background:linear-gradient(150deg,#dcece5,#f8faf9 55%,#dce8ef)}
+html[data-theme=light] .ambient-home :is(.ambient-weather,.ambient-notes){background:#fff;border-color:var(--line)}
+html[data-theme=light] .history-lend{border-inline-start:4px solid #db9f75}
+html[data-theme=light] .history-repay{border-inline-start:4px solid #57ae90}
+body:has(dialog[open]){overflow:hidden}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #488eac;outline-offset:2px}
+.shell .sidebar .nav-num{display:none}
+@media(min-width:701px){
+ .shell{display:grid;grid-template-columns:clamp(88px,13vw,180px) minmax(0,1fr);gap:var(--sp-gap);padding:14px}
+ .shell .sidebar{display:flex;flex-direction:column;position:sticky;inset:auto;top:14px;align-self:start;height:calc(100vh - 28px);height:calc(100dvh - 28px);border-radius:20px;padding:18px 8px;background:var(--forest);color:white;overflow:auto}
+ .shell .sidebar .brand{display:flex;padding:4px;gap:8px}.sidebar .brand small{display:none}
+ .shell .sidebar .nav{display:flex;flex-direction:column;gap:8px}
+ .shell .sidebar .nav button{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;color:#e2eee8;min-height:48px;padding:10px;gap:8px;font-size:13px}
+ .shell .sidebar .nav button.active{background:var(--mint);color:var(--forest);border-radius:12px}
+ .shell .sidebar .nav button.active .icon{color:inherit}
+ .sidebar .nav .active::before{display:none}
+ .shell .sidebar-bottom{display:block;color:#d6e7df;padding:10px 2px}.sidebar-bottom .text-button{color:#b7efdf}
+ .shell .workspace{padding:0 clamp(6px,1.4vw,24px) 32px;margin:0}
+}
+@media(min-width:701px) and (max-width:1050px){.shell .sidebar .nav button{flex-direction:column}.shell .sidebar .brand{justify-content:center}.shell .brand>div,.shell .sidebar-bottom .sync-line{display:none}}
+@media(max-width:700px){
+ .shell{display:block}.shell .workspace{margin:0;padding:8px 14px calc(100px + env(safe-area-inset-bottom))}
+ .shell .sidebar{display:block;position:fixed;z-index:22;inset:auto 10px max(8px,env(safe-area-inset-bottom));height:auto;margin:0;padding:5px;background:var(--glass);border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 28px #092e2924;backdrop-filter:blur(14px)}
+ .shell .sidebar .brand,.shell .sidebar-bottom{display:none}.shell .nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+ .shell .sidebar .nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:48px;padding:3px 0;font-size:10px;color:var(--muted)}
+ .shell .sidebar .nav button.active{background:var(--mint);color:var(--forest);border-radius:14px}.shell .sidebar .nav button.active .icon{color:inherit}
+ .shell .sidebar .nav button::before{display:none}
+ html[data-keyboard-open] .shell .sidebar{display:none}
+ .sp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sp-grid>.sp-cash,.sp-grid>.sp-loans,.sp-grid>.weather-panel{grid-column:1/-1}
+ .sp-grid>.sp-calendar{grid-row:3}.sp-card,.sp-grid>.time-panel,.sp-grid>.weather-panel{padding:14px}
+ .sp-grid .clock{font-size:clamp(32px,8vw,54px)}.sp-days{line-height:2}.sp-grid .time-footer{flex-wrap:wrap}
+}
+@media(max-width:420px){.sp-grid{grid-template-columns:minmax(0,1fr)}.sp-grid>.sp-calendar{grid-row:auto}.sp-grid>.sp-loans{grid-row:2}}
+@media(prefers-reduced-motion:no-preference){
+ html[data-motion=on]:not([data-effects=simple]) .sp-cash::after{animation:sp-light 26s ease-in-out infinite alternate}
+ @keyframes sp-light{to{transform:translateX(2%);opacity:.6}}
+}
+html[data-effects=simple] .shell .sidebar{backdrop-filter:none}
+html[data-effects=simple] .sp-cash::after{animation:none}
+.sp-identity{margin:12px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.sp-identity summary{cursor:pointer;min-height:32px;align-content:center}.sp-identity label{display:block;margin:10px 0}
+.sp-confirm{padding:var(--sp-pad)}.sp-display-totals{display:block;color:var(--muted);margin-block:4px}
+html[data-theme=light] body .ambient-home.has-notes{background:linear-gradient(135deg,#dcece5,#f8faf9 55%,#dce8ef)}
+html[data-theme=light] .ambient-home .ambient-enter,html[data-theme=light] .ambient-home .display-note-controls [aria-pressed=true]{background:var(--forest);color:white}
+html[data-theme=light] .ambient-home .ambient-header strong span{color:var(--accent)}
+html[data-theme=light] .ambient-home :is(.display-loan-empty,.display-notes-empty){background:var(--surface2);color:var(--muted)}
+html[data-theme=light] .loan-overview .loan-stats article{background:#f0f7f4;color:var(--forest)}
+html[data-theme=light] .loan-overview .loan-section-heading h2{color:white}
+html[data-theme=light] .loan-dialog .loan-editor-actions{background:var(--surface);border-color:var(--line)}
+html[data-theme=light] :is(.settings-detail,.settings-menu,.borrower-card,.loan-history,.loan-directory,.display-note-controls,.notes-workspace){border-color:var(--line)}
+html[data-theme=light] .borrower-card.is-outstanding .borrower-total{background:#f9e5d9;color:#6d3821}
+html[data-theme=light] .borrower-card.is-settled .borrower-total{background:#dceee5;color:var(--forest)}
+html[data-theme=light] #toast{background:var(--forest);color:white}
+.shell .brand strong{font-size:clamp(14px,1.5vw,22px)}
+.shell .nav button{position:relative;isolation:isolate}
+.shell .sidebar .nav button.active{background:transparent}
+.sp-indicator{position:absolute;z-index:-1;inset:0;pointer-events:none;border-radius:12px;background:var(--mint);box-shadow:0 0 16px #9bdac924}
+@media(prefers-reduced-motion:no-preference){
+ html[data-motion=on] .sp-grid>*{animation:sp-appear 240ms both var(--ease-standard)}
+ html[data-motion=on] .sp-grid>:nth-child(2){animation-delay:25ms}
+ html[data-motion=on] .sp-grid>:nth-child(3){animation-delay:40ms}
+ @keyframes sp-appear{from{opacity:.75;translate:0 5px}to{opacity:1;translate:none}}
+ html[data-motion=on] details[open].sp-identity>p{animation:sp-appear 160ms}
+ html[data-motion=on] .sp-track i{animation:sp-grow 250ms var(--ease-standard)}
+ @keyframes sp-grow{from{scale:0 1}to{scale:1}}
+}
+.sp-chart{grid-column:span 2}
+.sp-chart-key{display:flex;gap:16px;font-size:12px;color:var(--muted)}
+.sp-chart-key span::before{content:"";display:inline-block;width:9px;height:9px;margin-right:5px;border-radius:3px;background:#30856e}
+.sp-chart-key span+span::before{background:#c87d53}
+.sp-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;text-align:center;margin:12px 0}
+.sp-pair{height:64px;display:flex;align-items:end;justify-content:center;gap:3px;border-bottom:1px solid var(--line)}
+.sp-pair i{height:100%;width:min(12px,35%);background:#30856e;transform-origin:bottom;transform:scaleY(var(--share));border-radius:4px 4px 0 0}
+.sp-pair i+i{background:#c87d53}.sp-bars small{font-size:11px}
+.sp-chart summary{cursor:pointer;min-height:36px;padding:8px 0;font-size:13px}
+.sp-chart table{width:100%;border-collapse:collapse;font-size:13px}.sp-chart :is(th,td){padding:6px 4px;text-align:right;border-bottom:1px solid var(--line)}
+@media(max-width:700px){.sp-chart{grid-column:1/-1}.sp-grid>.sp-notes{grid-row:3}.sp-grid>.sp-calendar{grid-row:auto}}
+@media(prefers-reduced-motion:no-preference){
+ html[data-motion=on] .sp-pair i{animation:sp-bar-up 250ms var(--ease-standard)}
+ @keyframes sp-bar-up{from{transform:scaleY(0)}}
+ html[data-motion=on] .weather-main[aria-busy=true] .weather-orb{animation:sp-loading 1.3s ease-in-out infinite alternate}
+ @keyframes sp-loading{to{opacity:.35}}
+ html[data-motion=on] .shell .nav button .icon{transition:rotate .15s ease-out}
+ html[data-motion=on] .shell .nav button:active .icon{rotate:-5deg}
+}
+html[data-theme=light] .loan-overview .loan-sync,html[data-theme=light] .loan-overview .loan-sync :is(button,span){color:#c2efdf}
+html[data-theme=light] .sidebar-bottom .sync-line{color:#cedfd8}
+html[data-theme=light] body :is(.primary,.loan-dialog button[type=submit]){background:var(--forest);border-color:var(--forest);color:white}
+html[data-theme=light] body .primary:disabled{background:#d6e5df;color:#456257;border-color:#ced9d4}
+html[data-theme=light] .notes-workspace{background:#edf5f0}
+html[data-theme=light] .loan-directory .borrower-card,html[data-theme=light] .settings-detail.panel{background:var(--surface)}
+html[data-theme=light] .ambient-home .display-note-controls [role=group]{background:var(--surface2);border-color:var(--line)}
+html[data-theme=light] .ambient-home .display-note-controls button:not([aria-pressed=true]){color:var(--muted)}
+html[data-theme=light] .ambient-home .display-lending :is(h3,.display-loan-head strong,.display-loan-head span){color:var(--forest)}
+html[data-theme=light] .ambient-home .ambient-digits{color:#effaf5}
+@supports(height:100dvh){
+ body[data-page=display],body[data-page=display] .ambient-home.has-notes{height:min(100dvh,var(--display-height,100dvh));max-height:100dvh}
+}
+html[data-theme=dark] :is(.loan-directory,.borrower-profile,.settings-detail.panel,.notes-workspace,.loan-dialog,.loan-dialog .loan-editor-actions,.sp-confirm){background:var(--surface);color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] .loan-directory :is(.borrower-link,.loan-toolbar,.loan-history,.borrower-profile-head){background:var(--surface2);color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] .loan-directory :is(h2,h3,.borrower-profile-totals b){color:var(--ink)}
+html[data-theme=dark] .loan-directory :is(small,.loan-history p){color:var(--muted)}

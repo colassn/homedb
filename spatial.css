@@ -146,3 +146,61 @@ html[data-theme=dark] :is(.loan-directory,.borrower-profile,.settings-detail.pan
 html[data-theme=dark] .loan-directory :is(.borrower-link,.loan-toolbar,.loan-history,.borrower-profile-head){background:var(--surface2);color:var(--ink);border-color:var(--line)}
 html[data-theme=dark] .loan-directory :is(h2,h3,.borrower-profile-totals b){color:var(--ink)}
 html[data-theme=dark] .loan-directory :is(small,.loan-history p){color:var(--muted)}
+
+/* Quick capture and touch workspaces share the existing theme tokens. */
+.home-capture {
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:8px;
+ margin:0 0 var(--sp-gap);
+}
+.home-capture button, .notes-switch button {
+ min-height:48px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:6px;
+ padding-inline:8px;
+}
+.notes-switch {display:none}
+@media (max-width:1050px) and (pointer:coarse), (max-width:800px) {
+ .notes-switch {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+  padding:4px;
+  margin:0 0 12px;
+  border-radius:16px;
+  background:var(--surface2);
+ }
+ .notes-switch button[aria-pressed="true"] {
+  background:var(--surface);
+  border-color:var(--line);
+  color:var(--ink);
+  box-shadow:0 1px 4px #0002;
+ }
+ .notes-lending-grid {grid-template-columns:minmax(0,1fr)}
+ .notes-lending-grid[data-view="loans"] .notes-workspace,
+ .notes-lending-grid[data-view="memos"] .unified-loans {display:none}
+}
+@media (pointer:coarse) {
+ button, summary {touch-action:manipulation}
+ input:not([type=checkbox]):not([type=radio]), textarea, select {
+  font-size:max(16px, 1em);
+ }
+ dialog :is(.sheet-return,.sheet-actions button,.loan-editor-actions button) {
+  min-height:44px;
+ }
+}
+@media (max-width:700px) {
+ .home-capture .icon {width:16px;height:16px;flex-shrink:0}
+ .home-capture button {font-size:13px}
+ .shell .topbar .icon-btn,.shell .topbar .search-launch {min-width:44px;min-height:44px}
+}
+@media (pointer:coarse) and (min-width:801px) and (max-width:1180px) {
+ .shell .workspace {padding-inline:6px}
+ .sp-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ambient-home :is(.ambient-header button,.display-note-controls button) {
+  min-height:44px;
+ }
+}

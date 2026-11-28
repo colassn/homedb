@@ -204,3 +204,93 @@ html[data-theme=dark] .loan-directory :is(small,.loan-history p){color:var(--mut
   min-height:44px;
  }
 }
+
+/* Consolidate the dashboard into a summary with an optional detail area. */
+.sp-grid {
+ grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);
+}
+.sp-grid > .sp-cash, .sp-grid > .sp-loans {
+ grid-column:auto;
+ grid-row:auto;
+}
+.sp-grid > .sp-notes, .home-overview {grid-column:1/-1}
+.home-overview {min-width:0;border-block-start:1px solid var(--line)}
+.home-overview > summary {
+ cursor:pointer;
+ padding:14px 4px;
+ font-weight:650;
+}
+.home-overview-grid {
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:var(--sp-gap);
+}
+.home-overview-grid > * {min-width:0}
+.shell .workspace :is(.recent-row,.section-head) {min-width:0}
+.shell .workspace .recent-row span {overflow-wrap:anywhere}
+@media(max-width:700px){
+ .shell .sidebar .nav {grid-template-columns:repeat(4,minmax(0,1fr))}
+ .sp-grid, .home-overview-grid {grid-template-columns:minmax(0,1fr)}
+}
+
+.ambient-home.has-notes :is(.ambient-clock,.ambient-weather,.ambient-notes) {
+ min-width:0;
+ border-radius:0;
+ box-shadow:none;
+}
+.ambient-home.has-notes .ambient-notes {
+ background:transparent;
+ border:0;
+ border-block-start:1px solid var(--line);
+}
+.ambient-home.has-notes .display-records-grid {
+ flex:1 1 auto;
+ align-content:start;
+ min-height:0;
+ overflow:auto;
+ overscroll-behavior:contain;
+}
+.ambient-home.has-notes .ambient-note {
+ background:transparent;
+ border-radius:0;
+ border:0;
+ border-block-end:1px solid var(--line);
+ box-shadow:none;
+}
+@media (orientation:landscape) and (min-width:760px) {
+ .ambient-home.has-notes .ambient-grid {
+  grid-template-columns:minmax(0,2fr) minmax(0,3fr);
+  grid-template-rows:minmax(0,.85fr) minmax(0,1.15fr);
+  grid-template-areas:"clock notes" "weather notes";
+ }
+ .ambient-home.has-notes .ambient-notes {
+  border-block-start:0;
+  border-inline-start:1px solid var(--line);
+ }
+ .ambient-home.has-notes .display-records-grid {
+  grid-template-columns:minmax(0,1fr);
+ }
+}
+@media(max-width:540px){
+ .ambient-home.has-notes .display-records-grid {grid-template-columns:minmax(0,1fr)}
+}
+.ambient-home.has-notes .display-loan-list {
+ grid-template-columns:minmax(0,1fr);
+ gap:0;
+}
+.ambient-home.has-notes .display-loan-card {
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto;
+ align-items:center;
+ gap:8px;
+ background:transparent;
+ border:0;
+ border-radius:0;
+ border-block-end:1px solid var(--line);
+ box-shadow:none;
+}
+.ambient-home.has-notes .display-loan-card .display-loan-row {
+ min-width:0;
+}
+.ambient-home.has-notes .display-loan-card strong {overflow-wrap:anywhere}
+.ambient-home.has-notes .display-loan-card .display-repay-button {margin:4px 0}
